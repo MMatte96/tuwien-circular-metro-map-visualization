@@ -3,10 +3,12 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { CircularMetroMapComponent } from './components/d3/circular-metro-map/circular-metro-map.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    CircularMetroMapComponent
   ],
   imports: [
     BrowserModule,
