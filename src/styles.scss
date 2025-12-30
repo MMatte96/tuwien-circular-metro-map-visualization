@@ -1,1 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
+.metro-map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.metro-svg {
+  width: 100%;
+  height: 100%;
+  background: #fafafa;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.year-ring {
+  fill: none;
+  stroke: #e0e0e0;
+  stroke-width: 1;
+}
+
+.year-label {
+  font-size: 10px;
+  fill: #999;
+}

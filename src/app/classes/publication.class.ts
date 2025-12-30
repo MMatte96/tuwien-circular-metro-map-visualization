@@ -10,4 +10,8 @@ export class Publication {
     public venue: string
   ) {
   }
+
+  public printAuthors(): string {
+    return this.authors.map( a => a.name).join(', ');
+  }
 }
