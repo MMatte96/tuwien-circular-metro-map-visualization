@@ -40,8 +40,7 @@ export class MetroLayoutService {
       ringYears.push(y);
     }
 
-    const nodes = this.createNodes( publications, clusterIds );
-    const links = this.createLinks( publications, clusterIds );
+    const [ nodes, links ] = this.createClusterLine( publications, clusterIds );
 
     return {
       nodes,
@@ -53,24 +52,21 @@ export class MetroLayoutService {
     };
   }
 
-  private createNodes( publications: Publication[], clusterIds: number[] ): IMetroNode[] {
+  private createClusterLine( publications: Publication[], clusterIds: number[] ): [ nodes: IMetroNode[], links: IMetroLink[] ] {
     const clusterAngleScale = d3.scalePoint<number>()
       .domain( clusterIds )
       .range( [0, 2 * Math.PI] )
       .padding( 0.2 );
-    return publications.map( p=> {
-      const clusterAngles = p.clusters.map( c => clusterAngleScale(c)! );
-      const angle = d3.mean(clusterAngles)!;
 
-      return {
-        publication: p,
-        angle
-      }
-    } );
-  }
-
-  private createLinks ( publications: Publication[], clusterIds: number[] ): IMetroLink[] {
     const links: IMetroLink[] = [];
+    const angles = new Map<number, number[]>();
+    const pushHint = (pubId: number, a: number) => {
+      const arr = angles.get(pubId) ?? [];
+      arr.push(this.normalizeAngle(a));
+      angles.set(pubId, arr);
+    };
+
+    // create links
     clusterIds.forEach( clusterId => {
       const pubsInCluster = publications
         .filter( p => p.clusters.includes( clusterId ) )
@@ -80,17 +76,16 @@ export class MetroLayoutService {
         return;
       }
 
+      const arm1Angle = clusterAngleScale( clusterId ) as number;
+      const arm2Angle = arm1Angle + Math.PI;
+
       const centerPublication = pubsInCluster[0];
+      pushHint(centerPublication.id, arm1Angle)
       const arm1: Publication[] = [];
       const arm2: Publication[] = [];
 
       for ( let i = 1; i < pubsInCluster.length; i++ ) {
-        const publication = pubsInCluster[i];
-        if ( i % 2 === 1 ) {
-          arm1.push( publication );
-        } else {
-          arm2.push( publication );
-        }
+        ( i % 2 === 1 ? arm1 : arm2).push( pubsInCluster[i] );
       }
 
       let prev = centerPublication;
@@ -100,6 +95,8 @@ export class MetroLayoutService {
           target: p.id,
           cluster: clusterId
         })
+        pushHint(p.id, arm1Angle);
+        prev = p;
       });
 
       prev = centerPublication;
@@ -109,8 +106,51 @@ export class MetroLayoutService {
           target: p.id,
           cluster: clusterId
         })
+        pushHint(p.id, arm2Angle);
+        prev = p;
       });
     });
-    return links;
+
+    // create nodes
+    const nodes = publications.map( p=> {
+      const angleHints = angles.get( p.id );
+      let angle: number;
+      if (angleHints && angleHints.length > 0) {
+        angle = this.circularMean(angleHints);
+      } else {
+        const clusterAngles = p.clusters
+          .filter(c => clusterIds.includes(c))
+          .map(c => clusterAngleScale(c)!)
+          .filter(v => v != null);
+
+        angle = this.circularMean(clusterAngles);
+      }
+
+      return {
+        publication: p,
+        angle
+      }
+    } );
+
+    return [ nodes, links ];
+  }
+
+  private normalizeAngle(a: number): number {
+    const twoPi = 2 * Math.PI;
+    return ((a % twoPi) + twoPi) % twoPi;
+  }
+
+  private circularMean(angles: number[]): number {
+    if (!angles || angles.length === 0) return 0;
+
+    let sx = 0;
+    let sy = 0;
+    for (const a of angles) {
+      sx += Math.cos(a);
+      sy += Math.sin(a);
+    }
+
+    // atan2 gives angle in [-π, π], normalize to [0, 2π)
+    return this.normalizeAngle(Math.atan2(sy / angles.length, sx / angles.length));
   }
 }
