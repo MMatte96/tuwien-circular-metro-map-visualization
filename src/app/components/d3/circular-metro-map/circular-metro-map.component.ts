@@ -130,6 +130,42 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges{
       .attr('stroke', d => d.publication.clusters.length > 1 ? '#000000' : '#888888')
       .attr('stroke-width', d => d.publication.clusters.length > 1 ? 2 : 1)
 
+    const nodeById = new Map<number, IMetroNode>();
+    nodes.forEach( n => nodeById.set( n.publication.id, n ) );
+
+    // Links
+    const color = d3.scaleSequential()
+      .domain([0, clusterIds.length ])
+      .interpolator(d3.interpolateRainbow);
+
+    const colors = d3.range(clusterIds.length + 1).map(i => color(i));
+
+    const linksGroup = this.svg.append( 'g' )
+      .attr( 'class', 'links' );
+    linksGroup
+      .selectAll<SVGPathElement, IMetroLink>( 'path' )
+      .data( links )
+      .enter()
+      .append( 'path' )
+      .attr( 'd' , ( d: IMetroLink ) => {
+        const source = nodeById.get(d.source as number)!;
+        const target = nodeById.get(d.target as number)!;
+
+        const x1 = source.x!;
+        const y1 = source.y!;
+        const x2 = target.x!;
+        const y2 = target.y!;
+
+        // mid-point for a smooth curve
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+
+        return `M${x1},${y1} Q${mx},${my} ${x2},${y2}`;
+      })
+      .attr('stroke', ( d: IMetroLink ) => colors[ d.cluster ] )
+      .attr('stroke-width', 3)
+      .attr('fill', 'none')
+      .attr('stroke-linecap', 'round')
   }
 
 }
