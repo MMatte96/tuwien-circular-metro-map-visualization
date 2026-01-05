@@ -85,6 +85,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges{
     const ringGroup = this.svg.append( 'g' )
       .attr( 'class', 'rings' );
 
+    // Year rings
     ringGroup
       .selectAll( 'circle' )
       .data( ringYears )
@@ -105,5 +106,30 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges{
       .attr( 'text-anchor', 'middle' )
       .attr( 'class', 'year-label' )
       .text( y => y.toString() );
+
+    // Nodes
+    const nodesGroup = this.svg.append('g')
+      .attr('class', 'nodes');
+    nodes.forEach( n => {
+      n.radius = radiusScale( n.publication.year );
+      n.x = centerX + n.radius * Math.cos( n.angle );
+      n.y = centerY + n.radius * Math.sin( n.angle );
+      n.vx = 0;
+      n.vy = 0;
+    })
+    nodesGroup
+      .selectAll('circle')
+      .data(nodes)
+      .enter()
+      .append('circle')
+      .attr('class', 'metro-node')
+      .attr('cx', d => d.x!)
+      .attr('cy', d => d.y!)
+      .attr('r', d => d.publication.clusters.length > 1 ? 6 : 4)
+      .attr('fill', d => d.publication.clusters.length > 1 ? '#ffffff' : '#222222')
+      .attr('stroke', d => d.publication.clusters.length > 1 ? '#000000' : '#888888')
+      .attr('stroke-width', d => d.publication.clusters.length > 1 ? 2 : 1)
+
   }
+
 }
