@@ -1,4 +1,14 @@
-import {AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import { MetroLayoutService } from '../../../services/metro-layout.service';
 import { Publication } from '../../../classes/publication.class';
 import { IMetroNode } from '../../../interfaces/d3/metro-node.interface';
@@ -13,7 +23,7 @@ import {Author} from '../../../classes/author.class';
   templateUrl: './circular-metro-map.component.html',
   styleUrl: './circular-metro-map.component.scss'
 })
-export class CircularMetroMapComponent implements AfterViewInit, OnChanges{
+export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDestroy{
   @Input() public publications: Publication[] = [];
   @ViewChild('svgContainer', { static: true })
   public svgRef!: ElementRef<SVGSVGElement>;
@@ -48,6 +58,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges{
   }
 
   private render(): void {
+    this.stopSimulation();
     if ( !this.publications || this.publications.length === 0 ) {
       this.svg.selectAll('*').remove();
       return;
@@ -209,5 +220,15 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges{
           linkSelection.attr('d', pathD);
         }
       });
+  }
+
+  private stopSimulation(): void {
+    this.simulation?.stop();
+    this.simulation?.on( 'tick', null );
+    this.simulation = undefined;
+  }
+
+  public ngOnDestroy() {
+    this.stopSimulation();
   }
 }
