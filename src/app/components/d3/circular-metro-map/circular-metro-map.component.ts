@@ -119,29 +119,6 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
       .attr( 'class', 'year-label' )
       .text( y => y.toString() );
 
-    // Nodes
-    const nodesGroup = this.svg.append('g')
-      .attr('class', 'nodes');
-    nodes.forEach( n => {
-      n.radius = radiusScale( n.publication.year );
-      n.x = centerX + n.radius * Math.cos( n.angle );
-      n.y = centerY + n.radius * Math.sin( n.angle );
-      n.vx = 0;
-      n.vy = 0;
-    })
-    const nodeSelection = nodesGroup
-      .selectAll('circle')
-      .data(nodes)
-      .enter()
-      .append('circle')
-      .attr('class', 'metro-node')
-      .attr('cx', d => d.x!)
-      .attr('cy', d => d.y!)
-      .attr('r', d => d.publication.clusters.length > 1 ? 6 : 4)
-      .attr('fill', d => d.publication.clusters.length > 1 ? '#ffffff' : '#222222')
-      .attr('stroke', d => d.publication.clusters.length > 1 ? '#000000' : '#888888')
-      .attr('stroke-width', d => d.publication.clusters.length > 1 ? 2 : 1)
-
     const nodeById = new Map<number, IMetroNode>();
     nodes.forEach( n => nodeById.set( n.publication.id, n ) );
 
@@ -176,6 +153,29 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
       .attr('stroke-width', 3)
       .attr('fill', 'none')
       .attr('stroke-linecap', 'round')
+
+    // Nodes
+    const nodesGroup = this.svg.append('g')
+      .attr('class', 'nodes');
+    nodes.forEach( n => {
+      n.radius = radiusScale( n.publication.year );
+      n.x = centerX + n.radius * Math.cos( n.angle );
+      n.y = centerY + n.radius * Math.sin( n.angle );
+      n.vx = 0;
+      n.vy = 0;
+    })
+    const nodeSelection = nodesGroup
+      .selectAll('circle')
+      .data(nodes)
+      .enter()
+      .append('circle')
+      .attr('class', 'metro-node')
+      .attr('cx', d => d.x!)
+      .attr('cy', d => d.y!)
+      .attr('r', d => d.publication.clusters.length > 1 ? 6 : 4)
+      .attr('fill', d => d.publication.clusters.length > 1 ? '#ffffff' : '#222222')
+      .attr('stroke', d => d.publication.clusters.length > 1 ? '#000000' : '#888888')
+      .attr('stroke-width', d => d.publication.clusters.length > 1 ? 2 : 1)
 
     // Force Simulation
     const linkForce = d3.forceLink<IMetroNode, IMetroLink>(links)
