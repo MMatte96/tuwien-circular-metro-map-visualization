@@ -25,6 +25,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges{
 
   private svg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
   private layout: MetroLayout | null = null;
+  private simulation?: d3.Simulation<IMetroNode, IMetroLink>;
 
   constructor(
     private layoutService: MetroLayoutService
@@ -117,7 +118,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges{
       n.vx = 0;
       n.vy = 0;
     })
-    nodesGroup
+    const nodeSelection = nodesGroup
       .selectAll('circle')
       .data(nodes)
       .enter()
@@ -140,32 +141,73 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges{
 
     const colors = d3.range(clusterIds.length + 1).map(i => color(i));
 
+    const pathD = (d: IMetroLink) => {
+      const source = (typeof d.source === 'number') ? nodeById.get(d.source)! : d.source as IMetroNode;
+      const target = (typeof d.target === 'number') ? nodeById.get(d.target)! : d.target as IMetroNode;
+
+      const x1 = source.x ?? 0;
+      const y1 = source.y ?? 0;
+      const x2 = target.x ?? 0;
+      const y2 = target.y ?? 0;
+
+      return `M${x1},${y1} L${x2},${y2}`;
+    };
+
     const linksGroup = this.svg.append( 'g' )
       .attr( 'class', 'links' );
-    linksGroup
+    const linkSelection = linksGroup
       .selectAll<SVGPathElement, IMetroLink>( 'path' )
       .data( links )
       .enter()
       .append( 'path' )
-      .attr( 'd' , ( d: IMetroLink ) => {
-        const source = nodeById.get(d.source as number)!;
-        const target = nodeById.get(d.target as number)!;
-
-        const x1 = source.x!;
-        const y1 = source.y!;
-        const x2 = target.x!;
-        const y2 = target.y!;
-
-        // mid-point for a smooth curve
-        const mx = (x1 + x2) / 2;
-        const my = (y1 + y2) / 2;
-
-        return `M${x1},${y1} Q${mx},${my} ${x2},${y2}`;
-      })
+      .attr( 'd' , pathD )
       .attr('stroke', ( d: IMetroLink ) => colors[ d.cluster ] )
       .attr('stroke-width', 3)
       .attr('fill', 'none')
       .attr('stroke-linecap', 'round')
-  }
 
+    // Force Simulation
+    const linkForce = d3.forceLink<IMetroNode, IMetroLink>(links)
+      .id( d => d.publication.id )
+      .distance( 60 )
+      .strength( 0.15 );
+    const collideForce = d3.forceCollide<IMetroNode>()
+      .radius( d => d.publication.clusters.length > 1 ? 10 : 8)
+      .strength( 0.9 )
+      .iterations( 1 );
+    const chargeForce = d3.forceManyBody<IMetroNode>()
+      .strength( -10 );
+
+    this.simulation = d3.forceSimulation<IMetroNode>(nodes)
+      .force( 'link', linkForce )
+      .force('collide', collideForce )
+      .force( 'charge', chargeForce )
+      .alpha( 1 )
+      .alphaDecay( 0.06 )
+      .on( 'tick', () => {
+        for (const n of nodes) {
+          const dx = (n.x ?? 0) - centerX;
+          const dy = (n.y ?? 0) - centerY;
+
+          const r = Math.hypot(dx, dy);
+          // unit vector
+          const ux = dx / r;
+          const uy = dy / r;
+
+          const vr = (n.vx ?? 0) * ux + (n.vy ?? 0) * uy;
+          n.vx = (n.vx ?? 0) - vr * ux;
+          n.vy = (n.vy ?? 0) - vr * uy;
+
+          const R = n.radius ?? r;
+          n.x = centerX + ux * R;
+          n.y = centerY + uy * R;
+
+          // update DOM
+          nodeSelection
+            .attr('cx', d => d.x ?? 0)
+            .attr('cy', d => d.y ?? 0);
+          linkSelection.attr('d', pathD);
+        }
+      });
+  }
 }

@@ -4,6 +4,4 @@ export interface IMetroNode extends d3.SimulationNodeDatum {
   publication: Publication;
   angle: number;
   radius?: number;
-  x?: number;
-  y?: number;
 }
