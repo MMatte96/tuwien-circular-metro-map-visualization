@@ -91,11 +91,14 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
     const innerRadius = 15;
     const outerRadius = Math.min(width, height) / 2 - 30;
 
+    const zoomRoot = this.svg.append('g')
+      .attr('class', 'zoom-root');
+
     const radiusScale = d3.scaleLinear()
       .domain( [ minYear, maxYear ] )
       .range( [ innerRadius, outerRadius ] );
 
-    const ringGroup = this.svg.append( 'g' )
+    const ringGroup = zoomRoot.append( 'g' )
       .attr( 'class', 'rings' );
 
     // Year rings
@@ -142,7 +145,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
       return `M${x1},${y1} L${x2},${y2}`;
     };
 
-    const linksGroup = this.svg.append( 'g' )
+    const linksGroup = zoomRoot.append( 'g' )
       .attr( 'class', 'links' );
     const linkSelection = linksGroup
       .selectAll<SVGPathElement, IMetroLink>( 'path' )
@@ -156,7 +159,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
       .attr('stroke-linecap', 'round')
 
     // Nodes
-    const nodesGroup = this.svg.append('g')
+    const nodesGroup = zoomRoot.append('g')
       .attr('class', 'nodes');
     nodes.forEach( n => {
       n.radius = radiusScale( n.publication.year );
@@ -235,6 +238,14 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
           linkSelection.attr('d', pathD);
         }
       });
+
+      // Zooming and Panning
+      const zoomBehavior = d3.zoom<SVGSVGElement, unknown>()
+        .scaleExtent([0.5, 5])
+        .on('zoom', (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
+          zoomRoot.attr('transform', event.transform.toString());
+        });
+      this.svg.call( zoomBehavior );
   }
 
   private stopSimulation(): void {
