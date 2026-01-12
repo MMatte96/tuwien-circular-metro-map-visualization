@@ -14,8 +14,7 @@ import { Publication } from '../../../classes/publication.class';
 import { IMetroNode } from '../../../interfaces/d3/metro-node.interface';
 import { MetroLayout } from '../../../interfaces/d3/metro-layout.interace';
 import * as d3 from 'd3';
-import {IMetroLink} from '../../../interfaces/d3/metro-link.interface';
-import {Author} from '../../../classes/author.class';
+import { IMetroLink } from '../../../interfaces/d3/metro-link.interface';
 
 @Component({
   selector: 'app-circular-metro-map',
@@ -27,8 +26,10 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
   @Input() public publications: Publication[] = [];
   @ViewChild('svgContainer', { static: true })
   public svgRef!: ElementRef<SVGSVGElement>;
+  @ViewChild('metroMapWrapper', { static: true })
+  public containerElement!: ElementRef<HTMLElement>;
 
-  protected showTooltip: boolean = false;
+  protected showTooltip: boolean = true;
   protected tooltipX: number = 0;
   protected tooltipY: number = 0;
   protected tooltipData: IMetroNode | null = null;
@@ -177,10 +178,24 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
       .attr('stroke', d => d.publication.clusters.length > 1 ? '#000000' : '#888888')
       .attr('stroke-width', d => d.publication.clusters.length > 1 ? 2 : 1)
 
+    nodeSelection
+      .on('mouseenter', (event: MouseEvent, d: IMetroNode) => {
+
+        const r = this.containerElement.nativeElement.getBoundingClientRect();
+        this.tooltipX = event.clientX - r.left;
+        this.tooltipY = event.clientY - r.top;
+        this.tooltipData = d;
+        this.showTooltip = true;
+      })
+      .on('mouseleave', () => {
+        this.showTooltip = false;
+        this.tooltipData = null;
+      })
+
     // Force Simulation
     const linkForce = d3.forceLink<IMetroNode, IMetroLink>(links)
       .id( d => d.publication.id )
-      .distance( 60 )
+      .distance( 1 )
       .strength( 0.15 );
     const collideForce = d3.forceCollide<IMetroNode>()
       .radius( d => d.publication.clusters.length > 1 ? 10 : 8)

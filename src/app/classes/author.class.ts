@@ -4,4 +4,8 @@ export class Author {
     public id: number
   ) {
   }
+
+  public toString(): string {
+    return this.name;
+  }
 }

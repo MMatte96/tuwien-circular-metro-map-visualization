@@ -1,3 +1,15 @@
-<div class="metro-map-wrapper">
+<div class="metro-map-wrapper" #metroMapWrapper>
   <svg #svgContainer class="metro-svg"></svg>
+  @if( showTooltip && tooltipData ) {
+    <div
+      class="metro-map-tooltip"
+      [style.left.px]="tooltipX"
+      [style.top.px]="tooltipY">
+      <div>{{ tooltipData.publication.title }} - {{ tooltipData.publication.year }}</div>
+      <div>{{ tooltipData.publication.venue }}</div>
+      <div>{{ tooltipData.publication.authors.join(', ') }}</div>
+      <div style="margin-top: 10px">Lines: {{ tooltipData.publication.clusters.join(', ') }}</div>      
+    </div>
+  }
+
 </div>
