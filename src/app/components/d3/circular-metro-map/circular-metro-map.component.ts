@@ -41,6 +41,8 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
   private simulation?: d3.Simulation<IMetroNode, IMetroLink>;
   private linkSelection?: d3.Selection<SVGPathElement, IMetroLink, SVGGElement, unknown>;
 
+  private invisibleLines: Set<number> = new Set<number>();
+
   constructor(
     private layoutService: MetroLayoutService
   ) {
@@ -65,6 +67,17 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
 
     this.linkSelection?.attr('opacity', ( d: IMetroLink ) => {
       return d.cluster !== lineId ? 0.2 : 1.0;
+    });
+  }
+
+  protected toggleLineVisibility( lineId: number ): void {
+    if ( this.invisibleLines.has( lineId ) ) {
+      this.invisibleLines.delete( lineId );
+    } else {
+      this.invisibleLines.add( lineId );
+    }
+    this.linkSelection?.attr('display', ( d: IMetroLink ) => {
+      return this.invisibleLines.has( d.cluster ) ? 'none' : 'block';
     });
   }
 
@@ -256,7 +269,6 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
           n.x = centerX + ux * R;
           n.y = centerY + uy * R;
         }
-        console.log(this.simulation!.alpha());
         // update DOM
         nodeSelection
           .attr('cx', d => d.x ?? 0)

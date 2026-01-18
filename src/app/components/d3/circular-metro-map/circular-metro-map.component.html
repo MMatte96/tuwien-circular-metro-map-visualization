@@ -16,6 +16,7 @@
       <metro-map-legend 
       [lineData]="lineData"
       (hoverLine)="highlightLine($event)"
+      (clickLine)="toggleLineVisibility($event)"
       ></metro-map-legend>
     </div>
   }
