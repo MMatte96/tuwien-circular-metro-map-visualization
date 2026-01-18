@@ -255,13 +255,13 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
           const R = n.radius ?? r;
           n.x = centerX + ux * R;
           n.y = centerY + uy * R;
-
-          // update DOM
-          nodeSelection
-            .attr('cx', d => d.x ?? 0)
-            .attr('cy', d => d.y ?? 0);
-          this.linkSelection?.attr('d', pathD);
         }
+        console.log(this.simulation!.alpha());
+        // update DOM
+        nodeSelection
+          .attr('cx', d => d.x ?? 0)
+          .attr('cy', d => d.y ?? 0);
+        this.linkSelection?.attr('d', pathD);
       });
 
       // Zooming and Panning
