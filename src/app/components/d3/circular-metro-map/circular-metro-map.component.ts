@@ -5,7 +5,6 @@ import {
   Input,
   OnChanges,
   OnDestroy,
-  OnInit,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
@@ -15,6 +14,7 @@ import { IMetroNode } from '../../../interfaces/d3/metro-node.interface';
 import { MetroLayout } from '../../../interfaces/d3/metro-layout.interace';
 import * as d3 from 'd3';
 import { IMetroLink } from '../../../interfaces/d3/metro-link.interface';
+import { IMetroLine } from '../../../interfaces/d3/metro-line.interface';
 
 @Component({
   selector: 'app-circular-metro-map',
@@ -34,9 +34,12 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
   protected tooltipY: number = 0;
   protected tooltipData: IMetroNode | null = null;
 
+  protected lineData: IMetroLine[] = [];
+
   private svg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
   private layout: MetroLayout | null = null;
   private simulation?: d3.Simulation<IMetroNode, IMetroLink>;
+  private linkSelection?: d3.Selection<SVGPathElement, IMetroLink, SVGGElement, unknown>;
 
   constructor(
     private layoutService: MetroLayoutService
@@ -52,6 +55,21 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
     if( changes['publications'] && this.svg ) {
       this.render();
     }
+  }
+
+  protected highlightLine( lineId: number ): void {
+    if ( lineId === undefined ) {
+      this.resetHighlight();
+      return;
+    }
+
+    this.linkSelection?.attr('opacity', ( d: IMetroLink ) => {
+      return d.cluster !== lineId ? 0.2 : 1.0;
+    });
+  }
+
+  private resetHighlight(): void {
+    this.linkSelection?.attr('opacity', 1.0);
   }
 
   private initSvg(): void {
@@ -133,6 +151,12 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
 
     const colors = d3.range(clusterIds.length + 1).map(i => color(i));
 
+    this.lineData = clusterIds.map( id => ( {
+      id: id,
+      name: `Line ${id}`,
+      color: colors[id]
+    } ) );
+
     const pathD = (d: IMetroLink) => {
       const source = (typeof d.source === 'number') ? nodeById.get(d.source)! : d.source as IMetroNode;
       const target = (typeof d.target === 'number') ? nodeById.get(d.target)! : d.target as IMetroNode;
@@ -147,7 +171,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
 
     const linksGroup = zoomRoot.append( 'g' )
       .attr( 'class', 'links' );
-    const linkSelection = linksGroup
+    this.linkSelection = linksGroup
       .selectAll<SVGPathElement, IMetroLink>( 'path' )
       .data( links )
       .enter()
@@ -207,6 +231,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
     const chargeForce = d3.forceManyBody<IMetroNode>()
       .strength( -10 );
 
+    console.log('Starting simulation with nodes:', nodes.length, 'links:', links.length);
     this.simulation = d3.forceSimulation<IMetroNode>(nodes)
       .force( 'link', linkForce )
       .force('collide', collideForce )
@@ -235,7 +260,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
           nodeSelection
             .attr('cx', d => d.x ?? 0)
             .attr('cy', d => d.y ?? 0);
-          linkSelection.attr('d', pathD);
+          this.linkSelection?.attr('d', pathD);
         }
       });
 

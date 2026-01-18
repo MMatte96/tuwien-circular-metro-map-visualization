@@ -11,5 +11,13 @@
       <div style="margin-top: 10px">Lines: {{ tooltipData.publication.clusters.join(', ') }}</div>      
     </div>
   }
+  @if ( lineData.length > 0 ) {
+    <div class="metro-map-legend-container">
+      <metro-map-legend 
+      [lineData]="lineData"
+      (hoverLine)="highlightLine($event)"
+      ></metro-map-legend>
+    </div>
+  }
 
 </div>

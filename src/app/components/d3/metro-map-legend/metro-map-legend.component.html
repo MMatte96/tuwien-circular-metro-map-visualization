@@ -1,0 +1,8 @@
+<div class="legend">
+    @for (line of lineData; track $index) {
+        <div class="line" (click)="onLineClick(line.id)" (mouseenter)="onLineHover(line.id)" (mouseleave)="onLineHover(undefined)">
+            <div class="line-color-box" [style.background-color]="line.color"></div>
+            <div class="line-name">{{ line.name }}</div>
+        </div>
+    }
+</div>
