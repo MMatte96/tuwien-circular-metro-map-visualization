@@ -133,8 +133,9 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
     } = this.layout;
 
     this.svg.selectAll('*').remove();
-    const innerRadius = 15;
-    const outerRadius = Math.min(width, height) / 2 - 30;
+    const innerRadius = nodes.filter( n => n.publication.year === minYear ).length * 4;
+    const radiusStep = 30;
+    const outerRadius = innerRadius + ( maxYear - minYear ) * radiusStep;
 
     const zoomRoot = this.svg.append('g')
       .attr('class', 'zoom-root');
