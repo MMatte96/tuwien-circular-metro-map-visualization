@@ -13,7 +13,11 @@ export class MetroMapLegendComponent {
   protected selectedLine: number | null = null;
 
   protected onLineClick( lineId: number ): void {
-    this.selectedLine = lineId;
+    if( this.selectedLine === lineId ) {
+      this.selectedLine = null;
+    } else {
+      this.selectedLine = lineId;
+    }
     this.clickLine.emit( lineId );
   }
 }
