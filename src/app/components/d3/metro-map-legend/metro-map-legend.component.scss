@@ -10,6 +10,10 @@
     cursor: pointer;
 }
 
+.unselected {
+    opacity: 0.5;
+}
+
 .legend {
     display: flex;
     flex-direction: column;

@@ -9,14 +9,11 @@ import { IMetroLine } from '../../../interfaces/d3/metro-line.interface';
 })
 export class MetroMapLegendComponent {
   @Input() public lineData: IMetroLine[] = [];
-  @Output() public hoverLine = new EventEmitter<number>();
   @Output() public clickLine = new EventEmitter<number>();
-
-  protected onLineHover( lineId?: number ): void {
-    this.hoverLine.emit( lineId );
-  }
+  protected selectedLine: number | null = null;
 
   protected onLineClick( lineId: number ): void {
+    this.selectedLine = lineId;
     this.clickLine.emit( lineId );
   }
 }

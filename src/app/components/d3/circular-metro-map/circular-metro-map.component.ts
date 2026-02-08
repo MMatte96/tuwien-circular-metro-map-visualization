@@ -40,8 +40,9 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
   private layout: MetroLayout | null = null;
   private simulation?: d3.Simulation<IMetroNode, IMetroLink>;
   private linkSelection?: d3.Selection<SVGPathElement, IMetroLink, SVGGElement, unknown>;
+  private nodeSelection?: d3.Selection<SVGCircleElement, IMetroNode, SVGGElement, unknown>;
 
-  private invisibleLines: Set<number> = new Set<number>();
+  private selectedLine: number | null = null;
 
   constructor(
     private layoutService: MetroLayoutService
@@ -71,14 +72,27 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
   }
 
   protected toggleLineVisibility( lineId: number ): void {
-    if ( this.invisibleLines.has( lineId ) ) {
-      this.invisibleLines.delete( lineId );
+    if ( this.selectedLine ) {
+     if ( this.selectedLine === lineId ) {
+      this.selectedLine = null;
+     } else {
+      this.selectedLine = lineId;
+     }
     } else {
-      this.invisibleLines.add( lineId );
+      this.selectedLine = lineId;
     }
-    this.linkSelection?.attr('display', ( d: IMetroLink ) => {
-      return this.invisibleLines.has( d.cluster ) ? 'none' : 'block';
-    });
+
+    if( this.selectedLine ) {
+      this.linkSelection?.attr('display', ( d: IMetroLink ) => {
+        return this.selectedLine === d.cluster ? 'block' : 'none';
+      });
+      this.nodeSelection?.attr('display', ( d: IMetroNode ) => {
+        return d.publication.clusters.includes(this.selectedLine!) ? 'block' : 'none';
+      });
+    } else {
+      this.linkSelection?.attr('display', 'block');
+      this.nodeSelection?.attr('display', 'block');
+    }
   }
 
   private resetHighlight(): void {
@@ -205,7 +219,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
       n.vx = 0;
       n.vy = 0;
     })
-    const nodeSelection = nodesGroup
+    const nodeSelection = this.nodeSelection = nodesGroup
       .selectAll('circle')
       .data(nodes)
       .enter()
@@ -218,7 +232,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
       .attr('stroke', d => d.publication.clusters.length > 1 ? '#000000' : '#888888')
       .attr('stroke-width', d => d.publication.clusters.length > 1 ? 2 : 1)
 
-    nodeSelection
+    this.nodeSelection
       .on('mouseenter', (event: MouseEvent, d: IMetroNode) => {
 
         const r = this.containerElement.nativeElement.getBoundingClientRect();
