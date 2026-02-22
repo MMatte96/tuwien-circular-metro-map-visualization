@@ -1,7 +1,7 @@
 import json
-from collections import Counter
+from collections import Counter, OrderedDict
 
-def assign_clusters_to_publications(publications, clusters):
+def assign_clusters_to_publications(publications, clusters, cluster_definitions: list):
     publication_cluster_assignment = [
         {
             'id': entry['id'],
@@ -37,8 +37,13 @@ def assign_clusters_to_publications(publications, clusters):
         if entry['clusters']
     ]
 
+    input_structure = {
+        'publications': publication_cluster_assignment,
+        'clusters': cluster_definitions
+    }
+
     with open('output/publication_cluster_assignments.json', 'w') as f_out:
-        json.dump(publication_cluster_assignment, f_out)
+        json.dump(input_structure, f_out, indent=2)
 def cluster_for_fos(fos, clusters):
     for key, values in clusters.items():
         if fos in values:

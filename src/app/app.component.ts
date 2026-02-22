@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import {Publication} from './classes/publication.class';
 import {Author} from './classes/author.class';
 import {PublicationService} from './services/publication.service';
+import { IMetroLine } from './interfaces/d3/metro-line.interface';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,7 @@ export class AppComponent {
 
   private selectedFileList : FileList | null = null;
   protected publications: Publication[] = [];
+  protected clusterDefinitions: IMetroLine[] = [];
 
   constructor(
     private publicationService: PublicationService
@@ -26,7 +28,9 @@ export class AppComponent {
   protected async onUpload(): Promise<void> {
     if( !this.selectedFileList || this.selectedFileList.length === 0 ) return;
     const file = this.selectedFileList[0];
-    this.publications = await this.publicationService.loadPublicationsFromFile(file)
+    const inputStructure = await this.publicationService.loadPublicationsFromFile(file);
+    this.publications = inputStructure.publications;
+    this.clusterDefinitions = inputStructure.clusters;
     console.log(this.publications)
   }
 }

@@ -24,6 +24,7 @@ import { IMetroLine } from '../../../interfaces/d3/metro-line.interface';
 })
 export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDestroy{
   @Input() public publications: Publication[] = [];
+  @Input() public clusterDefinitions: IMetroLine[] = [];
   @ViewChild('svgContainer', { static: true })
   public svgRef!: ElementRef<SVGSVGElement>;
   @ViewChild('metroMapWrapper', { static: true })
@@ -179,11 +180,13 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
 
     const colors = d3.range(clusterIds.length + 1).map(i => color(i));
 
-    this.lineData = clusterIds.map( id => ( {
-      id: id,
-      name: `Line ${id}`,
-      color: colors[id]
-    } ) );
+    this.lineData = this.clusterDefinitions.map( c => {
+      return {
+        id: c.id,
+        name: c.name,
+        color: colors[c.id]
+      }
+    });
 
     const pathD = (d: IMetroLink) => {
       const source = (typeof d.source === 'number') ? nodeById.get(d.source)! : d.source as IMetroNode;

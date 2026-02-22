@@ -1,573 +1,585 @@
-[
-    {
-        "id": 1,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 1997,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 2,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 1995,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 3,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 1997,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 4,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 1995,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 5,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2000,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 6,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2001,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 7,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2002,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 8,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2003,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 9,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2004,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 10,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2004,
-        "venue": "CHI Extended Abstracts"
-    },
+{
+    "clusters":[
         {
-        "id": 11,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2004,
-        "venue": "CHI Extended Abstracts"
-    },
+            "id": 1,
+            "name": "Cluster 1"
+        },
         {
-        "id": 12,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2004,
-        "venue": "CHI Extended Abstracts"
-    }
-    ,    {
-        "id": 13,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2004,
-        "venue": "CHI Extended Abstracts"
-    },
+            "id": 2,
+            "name": "Cluster 2"
+        }
+    ],
+    "publications": [
         {
-        "id": 14,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
+            "id": 1,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 1997,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 2,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 1995,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 3,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 1997,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 4,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 1995,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 5,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2000,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 6,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2001,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 7,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2002,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 8,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2003,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 9,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2004,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 10,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2004,
+            "venue": "CHI Extended Abstracts"
+        },
             {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
+            "id": 11,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2004,
+            "venue": "CHI Extended Abstracts"
+        },
             {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2005,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 15,
-        "clusters": [
-            1
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
+            "id": 12,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2004,
+            "venue": "CHI Extended Abstracts"
+        }
+        ,    {
+            "id": 13,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2004,
+            "venue": "CHI Extended Abstracts"
+        },
             {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 1995,
-        "venue": "CHI Extended Abstracts"
-    },
+            "id": 14,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2005,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 15,
+            "clusters": [
+                1
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 1995,
+            "venue": "CHI Extended Abstracts"
+        },
 
-    {
-        "id": 16,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 1997,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 17,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 1995,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 18,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 1997,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 19,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 1995,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 20,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2000,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 21,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2001,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 22,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2002,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 23,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2003,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 24,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2004,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 25,
-        "clusters": [
-            1, 2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2004,
-        "venue": "CHI Extended Abstracts"
-    },
         {
-        "id": 26,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2004,
-        "venue": "CHI Extended Abstracts"
-    },
+            "id": 16,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 1997,
+            "venue": "CHI Extended Abstracts"
+        },
         {
-        "id": 27,
-        "clusters": [
-            1,2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2004,
-        "venue": "CHI Extended Abstracts"
-    }
-    ,    {
-        "id": 28,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
-            {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2004,
-        "venue": "CHI Extended Abstracts"
-    },
+            "id": 17,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 1995,
+            "venue": "CHI Extended Abstracts"
+        },
         {
-        "id": 29,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
+            "id": 18,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 1997,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 19,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 1995,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 20,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2000,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 21,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2001,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 22,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2002,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 23,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2003,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 24,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2004,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 25,
+            "clusters": [
+                1, 2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2004,
+            "venue": "CHI Extended Abstracts"
+        },
             {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
+            "id": 26,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2004,
+            "venue": "CHI Extended Abstracts"
+        },
             {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 2005,
-        "venue": "CHI Extended Abstracts"
-    },
-    {
-        "id": 30,
-        "clusters": [
-            2
-        ],
-        "title": "Navigation in Electronic Worlds.",
-        "authors": [
+            "id": 27,
+            "clusters": [
+                1,2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2004,
+            "venue": "CHI Extended Abstracts"
+        }
+        ,    {
+            "id": 28,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2004,
+            "venue": "CHI Extended Abstracts"
+        },
             {
-                "name": "George W. Furnas",
-                "id": 2019832499
-            },
-            {
-                "name": "Susanne Jul",
-                "id": 1806719435
-            }
-        ],
-        "year": 1995,
-        "venue": "CHI Extended Abstracts"
-    }
-]
+            "id": 29,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 2005,
+            "venue": "CHI Extended Abstracts"
+        },
+        {
+            "id": 30,
+            "clusters": [
+                2
+            ],
+            "title": "Navigation in Electronic Worlds.",
+            "authors": [
+                {
+                    "name": "George W. Furnas",
+                    "id": 2019832499
+                },
+                {
+                    "name": "Susanne Jul",
+                    "id": 1806719435
+                }
+            ],
+            "year": 1995,
+            "venue": "CHI Extended Abstracts"
+        }
+    ]
+}
