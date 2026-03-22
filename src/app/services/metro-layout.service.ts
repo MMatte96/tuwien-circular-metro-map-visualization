@@ -4,6 +4,7 @@ import { MetroLayout } from '../interfaces/d3/metro-layout.interace';
 import * as d3 from 'd3'
 import {IMetroNode} from '../interfaces/d3/metro-node.interface';
 import {IMetroLink} from '../interfaces/d3/metro-link.interface';
+import { SugiyamaService } from './sugiyama.service';
 
 @Injectable({
   providedIn: 'root'
@@ -41,9 +42,11 @@ export class MetroLayoutService {
     }
 
     const [ nodes, links ] = this.createClusterLine( publications, clusterIds );
+    const nodes_new = new SugiyamaService( nodes, links ).run();
+
 
     return {
-      nodes,
+      nodes: nodes_new,
       links,
       clusterIds,
       minYear,

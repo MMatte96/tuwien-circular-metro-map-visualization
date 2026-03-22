@@ -5,6 +5,7 @@
       class="metro-map-tooltip"
       [style.left.px]="tooltipX"
       [style.top.px]="tooltipY">
+      <div>ID: {{ tooltipData.publication.id }}</div>
       <div>{{ tooltipData.publication.title }} - {{ tooltipData.publication.year }}</div>
       <div>{{ tooltipData.publication.venue }}</div>
       <div>{{ tooltipData.publication.authors.join(', ') }}</div>
