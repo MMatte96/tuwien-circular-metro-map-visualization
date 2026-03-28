@@ -6,8 +6,7 @@ export class SugiyamaService {
     private links: IMetroLink[];
     private nodes: IMetroNode[];
     private layers: Map<number, IMetroNode[]> = new Map();
-    private virtualLayers: Map<number, IMetroNode[]> = new Map();
-    private virtualLinks: IMetroLink[] = [];
+    private bestLayers: Map<number, IMetroNode[]> = new Map();
 
     constructor(
         nodes: IMetroNode[],
@@ -18,13 +17,11 @@ export class SugiyamaService {
      } 
 
     public run(): IMetroNode[] {
-        const nodes = this.nodes.map( n => ({ ...n }) );
-
         this.assignLayers();
         this.orderVertices();
         this.assignCoordinates();
 
-        return nodes;
+        return this.nodes;
     }
 
     private assignLayers(): void {
@@ -38,17 +35,8 @@ export class SugiyamaService {
         }
     }
 
-    private orderVertices(): void {
-        this.createVirtualNodesAndLinks();
-        const layers = this.layers;
-        const links = this.links;
-        const best = [...layers.entries()]
-
-        for ( let i = 0; i < 24; i++) {
-            
-        }
-    }
-
+    // Virtual nodes are introduced for multi-layer spanning edges, to satisfy Sugiyama's prerequisite of edges only spanning adjacent layers. 
+    // They are placed in the next layer and connected to the original target with a new link. The original link is removed and replaced with a link from the source to the virtual node.
     private createVirtualNodesAndLinks(): void {
         let virtualIndex = 0;
         const layerKeys = Array.from(this.layers.keys()).sort((a, b) => a - b);
@@ -98,6 +86,134 @@ export class SugiyamaService {
         }
     }
 
+    // Count the number of edge crossings in the given layout
+    // Prerequisite: directed links only go from layer i to layer i+1, no intra-layer links, not multi-layer spanning links
+    private numberOfCrossings(layers: Map<number, IMetroNode[]>): number {
+        let crossings = 0;
+        for ( const [i, layer] of layers.entries() ) {
+            const nextLayer = layers.get( i + 1 );
+            if ( !nextLayer ) continue;
+            const nextLayerNodeIds = new Set( nextLayer.map( n => n.publication.id ) );
+            const layerLinks = this.links.filter( l => nextLayerNodeIds.has( l.target ) );
+            for ( let j = 0; j < layerLinks.length; j++ ) {
+                for ( let k = j + 1; k < layerLinks.length; k++ ) {
+                    const l1 = layerLinks[j];
+                    const l2 = layerLinks[k];
+                    const l1SourceIndex = layer.findIndex( n => n.publication.id === l1.source )!;
+                    const l1TargetIndex = nextLayer.findIndex( n => n.publication.id === l1.target )!;
+                    const l2SourceIndex = layer.findIndex( n => n.publication.id === l2.source )!;
+                    const l2TargetIndex = nextLayer.findIndex( n => n.publication.id === l2.target )!;
+                    if ( (l1SourceIndex < l2SourceIndex && l1TargetIndex > l2TargetIndex) ||
+                         (l1SourceIndex > l2SourceIndex && l1TargetIndex < l2TargetIndex) ) {
+                        crossings++;
+                    }
+                }
+            }
+        }
+        return crossings;
+    }
+
+    private median(arr: number[]): number {
+        if ( arr.length === 0 ) {
+            return Number.POSITIVE_INFINITY;
+        }
+        const sorted = arr.slice().sort( (a, b) => a - b );
+        const mid = Math.floor( sorted.length / 2 );
+        return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    }
+
+    private medianSweep( layers: Map<number, IMetroNode[]> ): Map<number, IMetroNode[]> {
+        const result = new Map<number, IMetroNode[]>();
+
+        // Deep-ish copy of map structure so original map is not mutated
+        const copy = Array.from(layers.keys()).sort((a, b) => a - b);
+        for (const key of copy) {
+            result.set(key, [...(layers.get(key) ?? [])]);
+        }
+
+        const sweep =( 
+            layerIndices: number[], 
+            getReferenceLayerKey: ( currentIndex: number ) => number,
+            getNeighborIds: ( node: IMetroNode ) => number[]
+        ): void => {
+            for (const currentIndex of layerIndices) {
+                const currentLayerKey = copy[currentIndex];
+                const referenceLayerKey = getReferenceLayerKey(currentIndex);
+
+                const currentLayer = [...(result.get(currentLayerKey) ?? [])];
+                const referenceLayer = result.get(referenceLayerKey) ?? [];
+
+                const referencePositions = new Map<number, number>();
+                for (let i = 0; i < referenceLayer.length; i++) {
+                    referencePositions.set(referenceLayer[i].publication.id, i);
+                }
+
+                const originalOrder = new Map<number, number>();
+                for (let i = 0; i < currentLayer.length; i++) {
+                    originalOrder.set(currentLayer[i].publication.id, i);
+                }
+
+                currentLayer.sort((a, b) => {
+                    const aPositions = getNeighborIds(a)
+                        .map(id => referencePositions.get(id))
+                        .filter((pos): pos is number => pos !== undefined);
+
+                    const bPositions = getNeighborIds(b)
+                        .map(id => referencePositions.get(id))
+                        .filter((pos): pos is number => pos !== undefined);
+
+                    const aMedian = this.median(aPositions);
+                    const bMedian = this.median(bPositions);
+
+                    if (aMedian === bMedian) {
+                        return (originalOrder.get(a.publication.id) ?? 0) - (originalOrder.get(b.publication.id) ?? 0);
+                    }
+
+                    return aMedian - bMedian;
+                });
+
+                result.set(currentLayerKey, currentLayer);
+            }
+        };
+
+        // top -> bottom
+        sweep(
+            Array.from({ length: copy.length - 1 }, (_, i) => i + 1),
+            currentIndex => copy[currentIndex - 1],
+            node =>
+                this.links
+                    .filter(link => link.target === node.publication.id)
+                    .map(link => link.source)
+        );
+
+        // bottom -> top
+        sweep(
+            Array.from({ length: copy.length - 1 }, (_, i) => copy.length - 2 - i),
+            currentIndex => copy[currentIndex + 1],
+            node =>
+                this.links
+                    .filter(link => link.source === node.publication.id)
+                    .map(link => link.target)
+        );
+
+        return result;
+    }
+
+    private orderVertices(): void {
+        this.createVirtualNodesAndLinks();
+        const layers = this.layers;
+        let best = new Map([...layers.entries()]);
+        for ( let i = 0; i < 24; i++) {
+            const transposed = this.medianSweep( best );
+            if( this.numberOfCrossings( transposed ) < this.numberOfCrossings( best ) ) {
+                best = transposed;
+            }
+        }
+        this.bestLayers = best;
+    }
+
+    // Assign radial coordinates to already existing nodes based on their layer and position within the layer. 
+    // Virtual nodes are ignored in this step, as they are only used for the crossing minimization and not part of the final layout.
     private assignCoordinates(): void {
 
     }  
