@@ -1,0 +1,21 @@
+.line-color-box {
+    width: 20px;
+    height: 20px;
+}
+
+.line {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+    cursor: pointer;
+}
+
+.unselected {
+    opacity: 0.5;
+}
+
+.legend {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+}

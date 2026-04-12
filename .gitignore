@@ -43,3 +43,7 @@ Thumbs.db
 
 .vscode/
 public/
+
+.venv/
+__pycache__/
+datasets/input/
