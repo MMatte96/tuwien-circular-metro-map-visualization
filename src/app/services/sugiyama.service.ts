@@ -55,12 +55,12 @@ export class SugiyamaService {
             const nextLayer = this.layers.get( nextLayerKey ) ?? [];
 
             for ( let node of currentLayer ) {
-                const nodeLayerKey = nodeIdToLayerKey.get( node.publication.id )!;
+                const nextLayerKeyIndex = layerKeys.indexOf( nextLayerKey );
                 // get all Links that are outgoing from this node and skip those that go to the next layer
                 const outgoingMulti = this.links.filter( 
                     l => 
                         l.source == node.publication.id &&
-                        Math.abs( nodeIdToLayerKey.get( l.target )! - nodeLayerKey ) > 1 &&
+                        layerKeys.indexOf( nodeIdToLayerKey.get( l.target )! ) !== nextLayerKeyIndex &&
                         nodeIdToLayerKey.get( l.target ) !== nextLayerKey
                 );
 
@@ -213,7 +213,6 @@ export class SugiyamaService {
      * will then handle any remaining non-adjacent spans.
      */
     private resolveIntraLayerEdgesBySublayering(): void {
-        console.log('here')
         const layerKeys = Array.from(this.layers.keys()).sort((a, b) => a - b);
 
         for (const layerKey of layerKeys) {
