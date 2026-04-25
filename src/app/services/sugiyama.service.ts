@@ -264,12 +264,12 @@ export class SugiyamaService {
             // Spaced strictly within (layerKey, layerKey + 1) to avoid collision
             // with the next integer year layer.
             // E.g. for layerKey=1998 and 3 participating nodes:
-            //   node0 → 1998.25, node1 → 1998.50, node2 → 1998.75
+            //   node0 → 1998, node1 → 1998.33333333333, node2 → 1998.666666666666666
             const nodeToSublayer = new Map<number, number>();
             for (let i = 0; i < topoOrder.length; i++) {
                 nodeToSublayer.set(
                     topoOrder[i],
-                    layerKey + (i + 1) / (topoOrder.length + 1)
+                    layerKey + i / topoOrder.length
                 );
             }
 
@@ -309,34 +309,21 @@ export class SugiyamaService {
             }
         }
         this.bestLayers = best;
+        this.assignLayersToNodes( best );
     }
 
-    /**
-     * After Sugiyama ordering, merges all sublayers belonging to the same parent year
-     * into a single ordered list for angular assignment.
-     *
-     * Returns a Map<year, IMetroNode[]> where each entry is the full ordered
-     * list of real (non-virtual) nodes for that year-ring.
-     */
-    private mergeSubLayersPerYear(): Map<number, IMetroNode[]> {
-        const merged = new Map<number, IMetroNode[]>();
-
-        // this.bestLayers is already sorted by key after resolveIntraLayerEdgesBySublayering()
-        for (const [key, nodes] of this.bestLayers.entries()) {
-            const year = Math.floor(key);
-            if (!merged.has(year)) merged.set(year, []);
-
-            // Filter out virtual nodes (id < 0) — they are ordering artifacts only
-            const realNodes = nodes.filter(n => n.publication.id >= 0);
-            merged.get(year)!.push(...realNodes);
+    // Assigns each node a layer property based on the layer it belongs to. This is used in the assignCoordinates step to determine the distance of each node from the center. Virtual nodes are assigned a layer as well, but this is only used for the crossing minimization and they are not part of the final layout.
+    private assignLayersToNodes(layers: Map<number, IMetroNode[]>): void {
+        for (const [layerKey, layerNodes] of layers.entries()) {
+            for (const node of layerNodes) {
+                node.layer = layerKey;
+            }
         }
-
-        return merged;
     }
 
     // Assign radial coordinates to already existing nodes based on their layer and position within the layer. 
     // Virtual nodes are ignored in this step, as they are only used for the crossing minimization and not part of the final layout.
     private assignCoordinates(): void {
-        const perYear = this.mergeSubLayersPerYear();
+
     }
 }
