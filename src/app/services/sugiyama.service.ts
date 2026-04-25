@@ -91,20 +91,33 @@ export class SugiyamaService {
     private numberOfCrossings(layers: Map<number, IMetroNode[]>): number {
         let crossings = 0;
         const layerKeys = Array.from(layers.keys()).sort((a, b) => a - b);
+
         for ( let i = 0; i < layerKeys.length - 1; i++ ) {
             const layer = layers.get(layerKeys[i])!;
             const nextLayer = layers.get(layerKeys[i + 1])!;
+
             if ( !nextLayer ) continue;
-            const nextLayerNodeIds = new Set( nextLayer.map( n => n.publication.id ) );
-            const layerLinks = this.links.filter( l => nextLayerNodeIds.has( l.target ) );
+
+            const sourcePos = new Map<number, number>();
+            const targetPos = new Map<number, number>();
+
+            layer.forEach((n, index) => sourcePos.set(n.publication.id, index));
+            nextLayer.forEach((n, index) => targetPos.set(n.publication.id, index));
+
+            const layerLinks = this.links.filter(l =>
+                sourcePos.has(l.source) &&
+                targetPos.has(l.target)
+            );
+
             for ( let j = 0; j < layerLinks.length; j++ ) {
                 for ( let k = j + 1; k < layerLinks.length; k++ ) {
                     const l1 = layerLinks[j];
                     const l2 = layerLinks[k];
-                    const l1SourceIndex = layer.findIndex( n => n.publication.id === l1.source )!;
-                    const l1TargetIndex = nextLayer.findIndex( n => n.publication.id === l1.target )!;
-                    const l2SourceIndex = layer.findIndex( n => n.publication.id === l2.source )!;
-                    const l2TargetIndex = nextLayer.findIndex( n => n.publication.id === l2.target )!;
+
+                    const l1SourceIndex = sourcePos.get(l1.source)!;
+                    const l1TargetIndex = targetPos.get(l1.target)!;
+                    const l2SourceIndex = sourcePos.get(l2.source)!;
+                    const l2TargetIndex = targetPos.get(l2.target)!;
                     if ( (l1SourceIndex < l2SourceIndex && l1TargetIndex > l2TargetIndex) ||
                          (l1SourceIndex > l2SourceIndex && l1TargetIndex < l2TargetIndex) ) {
                         crossings++;
@@ -124,8 +137,24 @@ export class SugiyamaService {
         return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
     }
 
+    private buildAdjacency() {
+        const incoming = new Map<number, number[]>();
+        const outgoing = new Map<number, number[]>();
+
+        for (const link of this.links) {
+            if (!incoming.has(link.target)) incoming.set(link.target, []);
+            incoming.get(link.target)!.push(link.source);
+
+            if (!outgoing.has(link.source)) outgoing.set(link.source, []);
+            outgoing.get(link.source)!.push(link.target);
+        }
+
+        return { incoming, outgoing };
+    }   
+
     private medianSweep( layers: Map<number, IMetroNode[]> ): Map<number, IMetroNode[]> {
         const result = new Map<number, IMetroNode[]>();
+        const { incoming, outgoing } = this.buildAdjacency();
 
         // Deep-ish copy of map structure so original map is not mutated
         const copy = Array.from(layers.keys()).sort((a, b) => a - b);
@@ -182,20 +211,14 @@ export class SugiyamaService {
         sweep(
             Array.from({ length: copy.length - 1 }, (_, i) => i + 1),
             currentIndex => copy[currentIndex - 1],
-            node =>
-                this.links
-                    .filter(link => link.target === node.publication.id)
-                    .map(link => link.source)
+            node => incoming.get(node.publication.id) ?? []
         );
 
         // bottom -> top
         sweep(
             Array.from({ length: copy.length - 1 }, (_, i) => copy.length - 2 - i),
             currentIndex => copy[currentIndex + 1],
-            node =>
-                this.links
-                    .filter(link => link.source === node.publication.id)
-                    .map(link => link.target)
+            node => outgoing.get(node.publication.id) ?? []
         );
 
         return result;
@@ -302,10 +325,13 @@ export class SugiyamaService {
         this.createVirtualNodesAndLinks();
         const layers = this.layers;
         let best = new Map([...layers.entries()]);
+        let bestCrossings = this.numberOfCrossings(best);
+
         for ( let i = 0; i < 24; i++) {
             const transposed = this.medianSweep( best );
-            if( this.numberOfCrossings( transposed ) < this.numberOfCrossings( best ) ) {
+            if( this.numberOfCrossings( transposed ) < bestCrossings ) {
                 best = transposed;
+                bestCrossings = this.numberOfCrossings(best);
             }
         }
         this.bestLayers = best;
