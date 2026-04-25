@@ -217,9 +217,9 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
     const nodesGroup = zoomRoot.append('g')
       .attr('class', 'nodes');
     nodes.forEach( n => {
-      n.radius = radiusScale( n.publication.year );
-      n.x = centerX + n.radius * Math.cos( n.angle );
-      n.y = centerY + n.radius * Math.sin( n.angle );
+      n.radius = radiusScale( n.layer! );
+      n.x = centerX + n.radius * Math.cos( n.angle ?? 0 );
+      n.y = centerY + n.radius * Math.sin( n.angle ?? 0 );
       n.vx = 0;
       n.vy = 0;
     })
@@ -264,9 +264,9 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
 
     console.log('Starting simulation with nodes:', nodes.length, 'links:', links.length);
     this.simulation = d3.forceSimulation<IMetroNode>(nodes)
-      .force( 'link', linkForce )
-      .force('collide', collideForce )
-      .force( 'charge', chargeForce )
+      //.force( 'link', linkForce )
+      //.force('collide', collideForce )
+      //.force( 'charge', chargeForce )
       .alpha( 1 )
       .alphaDecay( 0.06 )
       .on( 'tick', () => {

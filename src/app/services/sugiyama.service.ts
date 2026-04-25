@@ -323,7 +323,19 @@ export class SugiyamaService {
 
     // Assign radial coordinates to already existing nodes based on their layer and position within the layer. 
     // Virtual nodes are ignored in this step, as they are only used for the crossing minimization and not part of the final layout.
+    // For center nodes (no incoming edges), arms from different clusters are placed in opposite directions.
     private assignCoordinates(): void {
-
+        const layerKeys = Array.from(this.bestLayers.keys()).sort((a, b) => a - b);
+        for ( const layerKey of layerKeys ) {
+            const layer = this.bestLayers.get(layerKey) ?? [];
+            const maxLayerSize = Math.max( ...Array.from(this.bestLayers.values()).map( l => l.length ) );
+            for( const node of layer ) {
+                if ( node.publication.id < 0 ) {
+                    // virtual node, ignore
+                    continue;
+                }
+                node.angle = 2 * Math.PI * layer.indexOf(node) / maxLayerSize;
+            }
+        }
     }
 }
