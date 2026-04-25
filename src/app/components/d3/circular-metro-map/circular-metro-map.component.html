@@ -8,7 +8,7 @@
       <div>ID: {{ tooltipData.publication.id }}</div>
       <div>{{ tooltipData.publication.title }} - {{ tooltipData.publication.year }}</div>
       <div>{{ tooltipData.publication.venue }}</div>
-      <div>{{ tooltipData.publication.authors.join(', ') }}</div>
+      <div>{{ getAuthorNames(tooltipData.publication.authors) }}</div>
       <div style="margin-top: 10px">Lines: {{ tooltipData.publication.clusters.join(', ') }}</div>      
     </div>
   }

@@ -15,6 +15,7 @@ import { MetroLayout } from '../../../interfaces/d3/metro-layout.interace';
 import * as d3 from 'd3';
 import { IMetroLink } from '../../../interfaces/d3/metro-link.interface';
 import { IMetroLine } from '../../../interfaces/d3/metro-line.interface';
+import { Author } from '../../../classes/author.class';
 
 @Component({
   selector: 'app-circular-metro-map',
@@ -135,7 +136,14 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
 
     this.svg.selectAll('*').remove();
     const innerRadius = nodes.filter( n => n.publication.year === minYear ).length * 4;
-    const radiusStep = 30;
+    
+    const layers = nodes.map( n => n.layer! );
+    /*const mostFrequentLayer = Array.from(new Set(layers)).reduce((prev, curr) =>
+      layers.filter(el => el === curr).length > layers.filter(el => el === prev).length ? curr : prev
+    );
+    const mostFrequentLayerCount = layers.filter( l => l === mostFrequentLayer ).length;
+    const radiusStep = mostFrequentLayerCount * (6 + 12); */
+    const radiusStep = 40;
     const outerRadius = innerRadius + ( maxYear - minYear ) * radiusStep;
 
     const zoomRoot = this.svg.append('g')
@@ -296,7 +304,7 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
 
       // Zooming and Panning
       const zoomBehavior = d3.zoom<SVGSVGElement, unknown>()
-        .scaleExtent([0.5, 5])
+        .scaleExtent([0, 5])
         .on('zoom', (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
           zoomRoot.attr('transform', event.transform.toString());
         });
@@ -307,6 +315,10 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
     this.simulation?.stop();
     this.simulation?.on( 'tick', null );
     this.simulation = undefined;
+  }
+
+  protected getAuthorNames( authors: Author[] ): string {
+    return authors.map( a => a.name ).join(', ');
   }
 
   public ngOnDestroy() {
