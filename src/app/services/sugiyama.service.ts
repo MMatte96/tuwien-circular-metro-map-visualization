@@ -33,11 +33,19 @@ export class SugiyamaService {
                 this.layers.get( node.publication.year )!.push( node );
             }
         }
+        // get nodes size from layers
+        const totalNodes = Array.from(this.layers.values()).reduce((sum, layer) => sum + layer.length, 0);
+        console.log(`Assigned ${totalNodes} nodes to ${this.layers.size} layers based on publication year.`);
     }
 
     // Virtual nodes are introduced for multi-layer spanning edges, to satisfy Sugiyama's prerequisite of edges only spanning adjacent layers. 
     // They are placed in the next layer and connected to the original target with a new link. The original link is removed and replaced with a link from the source to the virtual node.
     private createVirtualNodesAndLinks(): void {
+        let totalNodesBefore = 0;
+        for (const layer of this.layers.values()) {
+            totalNodesBefore += layer.length;
+        }
+
         let virtualIndex = 0;
         const layerKeys = Array.from(this.layers.keys()).sort((a, b) => a - b);
         const nodeIdToLayerKey = new Map<number, number>();
@@ -84,6 +92,12 @@ export class SugiyamaService {
                 }
             }
         }
+
+        let totalNodesAfter = 0;
+        for (const layer of this.layers.values()) {
+            totalNodesAfter += layer.length;
+        }
+        console.log(`Virtual nodes: ${totalNodesBefore} nodes before → ${totalNodesAfter} nodes after (added ${virtualIndex} virtual nodes)`);
     }
 
     // Count the number of edge crossings in the given layout
@@ -225,11 +239,82 @@ export class SugiyamaService {
     }
 
     /**
+     * Detects if there are cycles in the intra-layer subgraph for a given layer.
+     * Returns the set of node IDs that are part of cycles, or empty set if acyclic.
+     * IMPORTANT: Properly handles all nodes that participate in ANY cycle, including
+     * those that may not be direct cycle participants but are affected by back edges.
+     */
+    private detectIntraLayerCycles(intraLinks: IMetroLink[]): Set<number> {
+        // Build adjacency list
+        const adj = new Map<number, Set<number>>();
+        const allNodeIds = new Set<number>();
+
+        for (const link of intraLinks) {
+            if (!adj.has(link.source)) adj.set(link.source, new Set());
+            if (!adj.has(link.target)) adj.set(link.target, new Set());
+            adj.get(link.source)!.add(link.target);
+            allNodeIds.add(link.source);
+            allNodeIds.add(link.target);
+        }
+
+        const cycleNodes = new Set<number>();
+        const visited = new Set<number>();
+        const recursionStack = new Set<number>();
+        const hasCycleInSubtree = new Set<number>();
+
+        const dfs = (nodeId: number): boolean => {
+            if (visited.has(nodeId)) {
+                // Already processed - check if it was part of a cycle
+                return hasCycleInSubtree.has(nodeId);
+            }
+
+            visited.add(nodeId);
+            recursionStack.add(nodeId);
+            let hasLocalCycle = false;
+
+            const neighbors = adj.get(nodeId) ?? [];
+            for (const neighbor of neighbors) {
+                if (!visited.has(neighbor)) {
+                    if (dfs(neighbor)) {
+                        hasLocalCycle = true;
+                        cycleNodes.add(nodeId);
+                    }
+                } else if (recursionStack.has(neighbor)) {
+                    // Back edge found - this is a cycle!
+                    hasLocalCycle = true;
+                    cycleNodes.add(nodeId);
+                    cycleNodes.add(neighbor);
+                }
+            }
+
+            recursionStack.delete(nodeId);
+            if (hasLocalCycle) {
+                hasCycleInSubtree.add(nodeId);
+            }
+            return hasLocalCycle;
+        };
+
+        for (const nodeId of allNodeIds) {
+            if (!visited.has(nodeId)) {
+                dfs(nodeId);
+            }
+        }
+
+        if (cycleNodes.size > 0) {
+            console.log(`detectIntraLayerCycles found ${cycleNodes.size} cyclic nodes out of ${allNodeIds.size}`);
+        }
+
+        return cycleNodes;
+    }
+
+    /**
      * Resolves intra-layer edges by promoting nodes to fractional sublayers.
      * The sublayers are purely logical — assignCoordinates() maps all nodes
      * belonging to the same parent year to the same radius ring.
      *
-     * Prerequisite: the intra-layer subgraph per year must be acyclic (DAG).
+     * Handles both acyclic and cyclic intra-layer subgraphs:
+     * - Acyclic: nodes are topologically sorted and assigned fractional sublayers
+     * - Cyclic: cyclic nodes are kept in the original layer; acyclic nodes are promoted
      *
      * After this method, every edge in this.links is between nodes in
      * different (possibly fractional) layer keys. createVirtualNodesAndLinks()
@@ -237,34 +322,74 @@ export class SugiyamaService {
      */
     private resolveIntraLayerEdgesBySublayering(): void {
         const layerKeys = Array.from(this.layers.keys()).sort((a, b) => a - b);
+        let totalNodesBeforeSublayering = 0;
 
         for (const layerKey of layerKeys) {
             const layer = this.layers.get(layerKey) ?? [];
+            totalNodesBeforeSublayering += layer.length;
             const layerNodeIds = new Set(layer.map(n => n.publication.id));
 
             const intraLinks = this.links.filter( l => layerNodeIds.has(l.source) && layerNodeIds.has(l.target) );
 
             if (intraLinks.length === 0) continue;
 
-            // --- Topological sort of participating nodes ---
-            // Only nodes involved in at least one intra-layer edge are promoted.
+            console.log(`Layer ${layerKey}: ${layer.length} nodes, ${intraLinks.length} intra-links`);
+
+            // Detect cycles in the intra-layer subgraph
+            const cycleNodes = this.detectIntraLayerCycles(intraLinks);
+
+            // Only nodes involved in at least one intra-layer edge are candidates for promotion.
             const participatingIds = new Set<number>([
                 ...intraLinks.map(l => l.source),
                 ...intraLinks.map(l => l.target),
             ]);
 
+            // Nodes that can be promoted: participating but not in a cycle
+            const promotableIds = new Set<number>(
+                [...participatingIds].filter(id => !cycleNodes.has(id))
+            );
+
+            if (promotableIds.size === 0) {
+                // All participating nodes are in cycles; keep them all in the original layer
+                if (cycleNodes.size > 0) {
+                    console.warn(
+                        `Layer ${layerKey}: All ${participatingIds.size} nodes with intra-layer edges are cyclic. Keeping them in the layer.`
+                    );
+                }
+                continue;
+            }
+
+            // --- Topological sort of promotable (acyclic) nodes ---
             const adj = new Map<number, Set<number>>();
             const inDegree = new Map<number, number>();
 
-            for (const id of participatingIds) {
+            for (const id of promotableIds) {
                 adj.set(id, new Set());
                 inDegree.set(id, 0);
             }
 
+            // Deduplicate edges between promotable nodes
+            const uniqueEdges = new Set<string>();
+            let edgeCountRaw = 0;
             for (const link of intraLinks) {
-                adj.get(link.source)!.add(link.target);
-                inDegree.set(link.target, (inDegree.get(link.target) ?? 0) + 1);
+                if (promotableIds.has(link.source) && promotableIds.has(link.target)) {
+                    edgeCountRaw++;
+                    const edgeKey = `${link.source}->${link.target}`;
+                    if (!uniqueEdges.has(edgeKey)) {
+                        uniqueEdges.add(edgeKey);
+                        adj.get(link.source)!.add(link.target);
+                        inDegree.set(link.target, (inDegree.get(link.target) ?? 0) + 1);
+                    }
+                }
             }
+
+            // Log in-degree distribution
+            const inDegreeHistogram: { [key: number]: number } = {};
+            for (const deg of inDegree.values()) {
+                inDegreeHistogram[deg] = (inDegreeHistogram[deg] ?? 0) + 1;
+            }
+            const zeroIndegree = [...inDegree.entries()].filter(([_, deg]) => deg === 0).length;
+            console.log(`Layer ${layerKey}: raw-edges=${edgeCountRaw}, unique-edges=${uniqueEdges.size}, in-degree histogram:`, inDegreeHistogram, `zeroIndegree=${zeroIndegree}`);
 
             const queue: number[] = [];
             for (const [id, deg] of inDegree.entries()) {
@@ -272,22 +397,37 @@ export class SugiyamaService {
             }
 
             const topoOrder: number[] = [];
+            let iterationCount = 0;
             while (queue.length > 0) {
                 const current = queue.shift()!;
                 topoOrder.push(current);
-                for (const neighbor of adj.get(current) ?? []) {
+                const outgoing = adj.get(current) ?? [];
+                for (const neighbor of outgoing) {
                     const newDeg = (inDegree.get(neighbor) ?? 1) - 1;
                     inDegree.set(neighbor, newDeg);
                     if (newDeg === 0) 
                         queue.push(neighbor);
                 }
+                iterationCount++;
             }
 
-            // Assign fractional sublayer keys
-            // Spaced strictly within (layerKey, layerKey + 1) to avoid collision
-            // with the next integer year layer.
-            // E.g. for layerKey=1998 and 3 participating nodes:
-            //   node0 → 1998, node1 → 1998.33333333333, node2 → 1998.666666666666666
+            // Final check: which nodes are still unvisited?
+            const inTopoOrder = new Set(topoOrder);
+            const unvisitedNodes = [...promotableIds].filter(id => !inTopoOrder.has(id));
+            if (unvisitedNodes.length > 0) {
+                const unvisitedInDegrees = unvisitedNodes.map(id => `${id}:${inDegree.get(id)}`).slice(0, 5);
+                console.warn(`Layer ${layerKey}: Unvisited=${unvisitedNodes.length}, final in-degrees: ${unvisitedInDegrees.join(', ')}`);
+            }
+
+            console.log(`Layer ${layerKey}: promotableIds=${promotableIds.size}, topoOrder=${topoOrder.length}, cycleNodes=${cycleNodes.size}`);
+
+            // Check for nodes missing from topoOrder
+            if (topoOrder.length < promotableIds.size) {
+                const missing = [...promotableIds].filter(id => !inTopoOrder.has(id));
+                console.warn(`Layer ${layerKey}: Missing ${missing.length} nodes from topoOrder: ${missing.slice(0, 10).join(',')}`);
+            }
+
+            // Assign fractional sublayer keys to acyclic nodes
             const nodeToSublayer = new Map<number, number>();
             for (let i = 0; i < topoOrder.length; i++) {
                 nodeToSublayer.set(
@@ -296,19 +436,40 @@ export class SugiyamaService {
                 );
             }
 
+            // Collect all nodes that will be affected
+            const promotableNodes = layer.filter(n => promotableIds.has(n.publication.id));
+
+            // Nodes that completed topo sort (will be promoted to sublayers)
+            const promotedNodes = promotableNodes.filter(n => inTopoOrder.has(n.publication.id));
+            const unvisitedPromotable = promotableNodes.filter(n => !inTopoOrder.has(n.publication.id));
+
             // --- Rebuild this.layers ---
-            // Remove participating nodes from the integer layer.
+            // Remove all promotable nodes from the integer layer (both promoted and unvisited)
             this.layers.set(
                 layerKey,
-                layer.filter(n => !participatingIds.has(n.publication.id))
+                layer.filter(n => !promotableIds.has(n.publication.id))
             );
 
-            // Place each participating node in its new fractional sublayer.
+            // Place promoted nodes in their new fractional sublayers
             for (const [nodeId, subKey] of nodeToSublayer.entries()) {
-                const node = layer.find(n => n.publication.id === nodeId)!;
+                const node = promotedNodes.find(n => n.publication.id === nodeId)!;
                 if (!this.layers.has(subKey)) 
                     this.layers.set(subKey, []);
                 this.layers.get(subKey)!.push(node);
+            }
+
+            // SAFETY: If topological sort was incomplete, keep unvisited nodes in original layer
+            // rather than losing them (which was the bug causing node loss)
+            if (unvisitedPromotable.length > 0) {
+                console.warn(`Layer ${layerKey}: Keeping ${unvisitedPromotable.length} incomplete-topo nodes in original layer (safety fallback)`);
+                const originalLayerNodes = this.layers.get(layerKey) ?? [];
+                this.layers.set(layerKey, [...originalLayerNodes, ...unvisitedPromotable]);
+            }
+
+            if (cycleNodes.size > 0) {
+                console.log(
+                    `Layer ${layerKey}: ${topoOrder.length} acyclic nodes promoted, ${cycleNodes.size} cyclic nodes retained in layer.`
+                );
             }
         }
 
@@ -318,22 +479,41 @@ export class SugiyamaService {
             [...this.layers.entries()].sort(([a], [b]) => a - b)
         );
         this.layers = sorted;
+
+        let totalNodesAfterSublayering = 0;
+        for (const layer of this.layers.values()) {
+            totalNodesAfterSublayering += layer.length;
+        }
+        console.log(`Sublayering: ${totalNodesBeforeSublayering} nodes before → ${totalNodesAfterSublayering} nodes after`);
     }
 
     private orderVertices(): void {
+        console.log(`orderVertices START: ${Array.from(this.layers.values()).reduce((sum, layer) => sum + layer.length, 0)} nodes in layers`);
+
         this.resolveIntraLayerEdgesBySublayering();
+        console.log(`After sublayering: ${Array.from(this.layers.values()).reduce((sum, layer) => sum + layer.length, 0)} nodes in layers`);
+
         this.createVirtualNodesAndLinks();
+        console.log(`After virtual nodes: ${Array.from(this.layers.values()).reduce((sum, layer) => sum + layer.length, 0)} nodes in layers`);
+
         const layers = this.layers;
         let best = new Map([...layers.entries()]);
+        console.log(`After copy: ${Array.from(best.values()).reduce((sum, layer) => sum + layer.length, 0)} nodes in best`);
+
         let bestCrossings = this.numberOfCrossings(best);
+        console.log(`Initial crossings: ${bestCrossings}`);
 
         for ( let i = 0; i < 24; i++) {
             const transposed = this.medianSweep( best );
+            const nodesInTransposed = Array.from(transposed.values()).reduce((sum, layer) => sum + layer.length, 0);
+            console.log(`Iteration ${i}: transposed has ${nodesInTransposed} nodes`);
             if( this.numberOfCrossings( transposed ) < bestCrossings ) {
                 best = transposed;
                 bestCrossings = this.numberOfCrossings(best);
             }
         }
+        console.log(`After median sweep: ${Array.from(best.values()).reduce((sum, layer) => sum + layer.length, 0)} nodes in best`);
+
         this.bestLayers = best;
         this.assignLayersToNodes( best );
     }
@@ -351,6 +531,7 @@ export class SugiyamaService {
     // Virtual nodes are ignored in this step, as they are only used for the crossing minimization and not part of the final layout.
     // For center nodes (no incoming edges), arms from different clusters are placed in opposite directions.
     private assignCoordinates(): void {
+        let assignedCoordinates = 0;
         const layerKeys = Array.from(this.bestLayers.keys()).sort((a, b) => a - b);
         for ( const layerKey of layerKeys ) {
             const layer = this.bestLayers.get(layerKey) ?? [];
@@ -361,7 +542,9 @@ export class SugiyamaService {
                     continue;
                 }
                 node.angle = 2 * Math.PI * layer.indexOf(node) / maxLayerSize;
+                assignedCoordinates++;
             }
         }
+        console.log(`Assigned coordinates to ${assignedCoordinates} nodes across ${layerKeys.length} layers.`);
     }
 }

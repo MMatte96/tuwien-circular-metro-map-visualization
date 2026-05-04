@@ -134,6 +134,26 @@ export class CircularMetroMapComponent implements AfterViewInit, OnChanges, OnDe
       ringYears
     } = this.layout;
 
+    console.log('Layout built with nodes:', nodes.length, 'links:', links.length);
+
+    function findDuplicates(items: IMetroNode[]): IMetroNode[][] {
+      const map = new Map<string, IMetroNode[]>();
+
+      for (const item of items) {
+        const key = `${item.layer?.toFixed(10)}-${item.angle?.toFixed(10)}`;
+
+        if (!map.has(key)) {
+          map.set(key, []);
+        }
+
+        map.get(key)!.push(item);
+      }
+
+      // Only return groups with duplicates
+      return Array.from(map.values()).filter(group => group.length > 1);
+    }
+    console.log('Duplicate nodes:', findDuplicates(nodes));
+
     this.svg.selectAll('*').remove();
     const innerRadius = nodes.filter( n => n.publication.year === minYear ).length * 4;
     

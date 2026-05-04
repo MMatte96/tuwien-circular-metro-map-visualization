@@ -5,13 +5,14 @@ import * as d3 from 'd3'
 import {IMetroNode} from '../interfaces/d3/metro-node.interface';
 import {IMetroLink} from '../interfaces/d3/metro-link.interface';
 import { SugiyamaService } from './sugiyama.service';
+import { CycleDetectionService } from './cycle-detection.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MetroLayoutService {
 
-  constructor() { }
+  constructor(private cycleDetection: CycleDetectionService) { }
 
   public buildLayout( publications: Publication[] ): MetroLayout {
     if ( !publications || publications.length === 0 ) {
@@ -40,6 +41,10 @@ export class MetroLayoutService {
     }
 
     const [ nodes, links ] = this.createClusterLine( publications, clusterIds );
+    console.log( 'Cluster lines created' );
+    //this.checkForCycles( nodes, links );
+
+
     const nodes_new = new SugiyamaService( nodes, links ).run();
     console.log( 'Sugiyama layout completed' );
 
@@ -59,7 +64,7 @@ export class MetroLayoutService {
     clusterIds.forEach( clusterId => {
       const pubsInCluster = publications
         .filter( p => p.clusters.includes( clusterId ) )
-        .sort( (a, b ) => a.year - b.year );
+        .sort( (a, b ) => a.year - b.year || a.id - b.id );
 
       if (pubsInCluster.length <= 1) {
         return;
@@ -103,4 +108,15 @@ export class MetroLayoutService {
 
     return [ nodes, links ];
   }
+
+  checkForCycles(nodes: IMetroNode[], links: IMetroLink[]): void {
+    const cyclicSubgraphs = this.cycleDetection.findCyclicSubgraphs(nodes, links);
+  
+  if (cyclicSubgraphs.length > 0) {
+    console.log('Found cycles:', cyclicSubgraphs);
+    cyclicSubgraphs.forEach((subgraph, index) => {
+      console.log(`Cycle ${index}: ${subgraph.nodes.length} nodes, ${subgraph.links.length} links`);
+    });
+  }
+}
 }
