@@ -100,46 +100,90 @@ export class SugiyamaService {
         console.log(`Virtual nodes: ${totalNodesBefore} nodes before → ${totalNodesAfter} nodes after (added ${virtualIndex} virtual nodes)`);
     }
 
-    // Count the number of edge crossings in the given layout
-    // Prerequisite: directed links only go from layer i to layer i+1, no intra-layer links, not multi-layer spanning links
-    private numberOfCrossings(layers: Map<number, IMetroNode[]>): number {
-        let crossings = 0;
+    private circularEdgeLengthScore(layers: Map<number, IMetroNode[]>): number {
+        let score = 0;
         const layerKeys = Array.from(layers.keys()).sort((a, b) => a - b);
-
         for ( let i = 0; i < layerKeys.length - 1; i++ ) {
             const layer = layers.get(layerKeys[i])!;
             const nextLayer = layers.get(layerKeys[i + 1])!;
-
             if ( !nextLayer ) continue;
 
-            const sourcePos = new Map<number, number>();
-            const targetPos = new Map<number, number>();
+            score += this.circularEdgeLengthScoreForLayer(layer, nextLayer);
+        }
+        return score;
+    }
 
+    private circularEdgeLengthScoreForLayer(layer: IMetroNode[], nextLayer: IMetroNode[]): number {
+        let score = 0;
+        const sourcePos = new Map<number, number>();
+            const targetPos = new Map<number, number>();
             layer.forEach((n, index) => sourcePos.set(n.publication.id, index));
             nextLayer.forEach((n, index) => targetPos.set(n.publication.id, index));
+
+            const n = Math.max(layer.length, nextLayer.length);
 
             const layerLinks = this.links.filter(l =>
                 sourcePos.has(l.source) &&
                 targetPos.has(l.target)
             );
 
-            for ( let j = 0; j < layerLinks.length; j++ ) {
-                for ( let k = j + 1; k < layerLinks.length; k++ ) {
-                    const l1 = layerLinks[j];
-                    const l2 = layerLinks[k];
+            for ( const link of layerLinks ) {
+                const sourceIndex = sourcePos.get(link.source)!;
+                const targetIndex = targetPos.get(link.target)!;
+                score += this.circularDistance(sourceIndex, targetIndex, n);
+            }
+        return score;
+    }
 
-                    const l1SourceIndex = sourcePos.get(l1.source)!;
-                    const l1TargetIndex = targetPos.get(l1.target)!;
-                    const l2SourceIndex = sourcePos.get(l2.source)!;
-                    const l2TargetIndex = targetPos.get(l2.target)!;
-                    if ( (l1SourceIndex < l2SourceIndex && l1TargetIndex > l2TargetIndex) ||
-                         (l1SourceIndex > l2SourceIndex && l1TargetIndex < l2TargetIndex) ) {
-                        crossings++;
-                    }
-                }
+    private circularDistance( a: number, b: number, n:number ): number {
+        const diff = Math.abs(a - b);
+        return Math.min(diff, n - diff);
+    }
+
+    private rotateArray<T>( array: T[], shift: number ): T[] {
+        const normalizedShift = shift % array.length;
+
+        return [
+            ...array.slice(normalizedShift),
+            ...array.slice(0, normalizedShift)
+    ];
+}
+
+    private findBestRotationForLayer(prevLayer: IMetroNode[], currentLayer: IMetroNode[], nextLayer: IMetroNode[]): IMetroNode[] {
+        if (currentLayer.length <= 2) {
+            return currentLayer;
+        }
+
+        let bestLayer = currentLayer;
+        let bestScore = this.circularEdgeLengthScoreForLayer(prevLayer, currentLayer) + this.circularEdgeLengthScoreForLayer(currentLayer, nextLayer);
+
+        for (let shift = 1; shift < currentLayer.length; shift++) {
+            const rotated = this.rotateArray(currentLayer, shift);
+            const score = this.circularEdgeLengthScoreForLayer(prevLayer, rotated) + this.circularEdgeLengthScoreForLayer(rotated, nextLayer);
+            if (score < bestScore) {
+                bestScore = score;
+                bestLayer = rotated;
             }
         }
-        return crossings;
+        return bestLayer;
+    }
+
+    private rotateCircularLayers(layers: Map<number, IMetroNode[]>, layerKeys: number[]): void {
+        for (const layerKey of layerKeys) {
+
+            const layerKeyIndex = layerKeys.indexOf(layerKey);
+            const layer = layers.get(layerKey);
+  
+            const prevLayerKey = layerKeys[layerKeyIndex - 1];
+            const nextLayerKey = layerKeys[layerKeyIndex + 1];
+            const prevLayer = layers.get(prevLayerKey) ?? [];
+            const nextLayer = layers.get(nextLayerKey) ?? [];
+
+            if (!layer || layer.length <= 2) continue;
+            
+            const bestRotation = this.findBestRotationForLayer(prevLayer, layer, nextLayer);
+            layers.set(layerKey, bestRotation)
+        }
     }
 
     private median(arr: number[]): number {
@@ -234,6 +278,8 @@ export class SugiyamaService {
             currentIndex => copy[currentIndex + 1],
             node => outgoing.get(node.publication.id) ?? []
         );
+
+        this.rotateCircularLayers(result, copy);
 
         return result;
     }
@@ -500,21 +546,25 @@ export class SugiyamaService {
         let best = new Map([...layers.entries()]);
         console.log(`After copy: ${Array.from(best.values()).reduce((sum, layer) => sum + layer.length, 0)} nodes in best`);
 
-        let bestCrossings = this.numberOfCrossings(best);
-        console.log(`Initial crossings: ${bestCrossings}`);
+        let bestScore = this.circularEdgeLengthScore(best);
+        console.log(`Initial circular edge length score: ${bestScore}`);
 
         for ( let i = 0; i < 24; i++) {
             const transposed = this.medianSweep( best );
             const nodesInTransposed = Array.from(transposed.values()).reduce((sum, layer) => sum + layer.length, 0);
             console.log(`Iteration ${i}: transposed has ${nodesInTransposed} nodes`);
-            if( this.numberOfCrossings( transposed ) < bestCrossings ) {
+
+            const transposedScore = this.circularEdgeLengthScore(transposed);
+            if (transposedScore < bestScore) {
                 best = transposed;
-                bestCrossings = this.numberOfCrossings(best);
+                bestScore = transposedScore;
+                console.log(`New best found at iteration ${i} with circular edge length score: ${bestScore}`);
             }
         }
         console.log(`After median sweep: ${Array.from(best.values()).reduce((sum, layer) => sum + layer.length, 0)} nodes in best`);
 
         this.bestLayers = best;
+        console.log(`Best circular edge length score after median sweep: ${bestScore}`);
         this.assignLayersToNodes( best );
     }
 
